@@ -19,20 +19,32 @@ export class AppService {
     return ({ name: 'amit' });
   }
   async getSignedURL(fileName: string): Promise<any> {
-    return new Promise((res, rej) => {
+    return new Promise(async (res, rej) => {
       const params = {
         Bucket: 'photobookbucket',
         Key: fileName,
 
       }
-      s3.getSignedUrl('getObject', params, (err, getUrl) => {
-        s3.getSignedUrl('putObject', params, (err, putUrl) => {
-          if (err) {
-            return rej(err)
-          }
-          return res(putUrl)
+      const objectUrl = await this.getSignedObjectUrl(params)
+      const objectPutUrl = await this.getSignedPutObjectUrl(params)
+      return res(objectPutUrl)
 
-        })
+
+    })
+  }
+
+  async getSignedObjectUrl(params: any): Promise<any> {
+    return new Promise((res, rej) => {
+      s3.getSignedUrl('getObject', params, (err, getUrl) => {
+        return res(getUrl)
+      })
+    })
+  }
+
+  async getSignedPutObjectUrl(params: any): Promise<any> {
+    return new Promise((res, rej) => {
+      s3.getSignedUrl('putObject', params, (err, getUrl) => {
+        return res(getUrl)
       })
     })
   }
