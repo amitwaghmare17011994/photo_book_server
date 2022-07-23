@@ -1,0 +1,3 @@
+interface Dummy{
+    name:string
+}
