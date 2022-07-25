@@ -32,7 +32,7 @@ export class PhotosService {
 
   findAll() {
     return this.photosRepository.find()
-   }
+  }
 
   findOne(id: number) {
     return `This action returns a #${id} photo`;
@@ -56,10 +56,11 @@ export class PhotosService {
 
       const objectUrl = await this.getSignedObjectUrl(params)
       const objectPutUrl = await this.getSignedPutObjectUrl(params)
+      console.log(objectUrl)
       await this.photosRepository.insert({
-        name: fileName,
         getUrl: objectUrl,
         putUrl: objectPutUrl,
+        name: fileName,
         type: type
       })
       return res(objectPutUrl)
