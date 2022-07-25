@@ -4,6 +4,7 @@ interface Dummy{
 
 interface FilePayload{
     name:string
+    type:string
 }
 
 interface SignedURLResponse{
