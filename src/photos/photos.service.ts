@@ -54,16 +54,16 @@ export class PhotosService {
 
       }
 
-      const objectUrl = await this.getSignedObjectUrl(params)
-      const objectPutUrl = await this.getSignedPutObjectUrl(params)
-      console.log(objectUrl)
+      // const objectUrl = await this.getSignedObjectUrl(params)
+      // const objectPutUrl = await this.getSignedPutObjectUrl(params)
+      // console.log(objectUrl)
       await this.photosRepository.insert({
-        getUrl: objectUrl,
-        putUrl: objectPutUrl,
+        getUrl: 'amit',
+        putUrl: 'amit',
         name: fileName,
         type: type
       })
-      return res(objectPutUrl)
+      return res('amit')
     })
   }
 
