@@ -6,11 +6,12 @@ import { AppService } from './app.service';
 import { Photos } from './photos/entities/photo.entity';
 import { PhotosModule } from './photos/photos.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-
+import { HttpModule } from '@nestjs/axios'
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true }),
 
+    ConfigModule.forRoot({ isGlobal: true }),
+    HttpModule,
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
@@ -22,15 +23,16 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
         database: configService.get('DB_NAME'),
         entities: [Photos],
         synchronize: true,
-        ssl:{
-          rejectUnauthorized:false
+        ssl: {
+          rejectUnauthorized: false
         }
       }),
       inject: [ConfigService],
 
 
     }),
-    PhotosModule
+    PhotosModule,
+
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
+import { HttpService } from '@nestjs/axios'
 
 const aws = require('aws-sdk')
+const fast2sms = require('fast-two-sms')
 
 
 const s3 = new aws.S3(
@@ -15,9 +17,29 @@ const s3 = new aws.S3(
 
 @Injectable()
 export class AppService {
-  getHello(): Dummy {
-    return ({ name: 'amit' });
+  constructor(private readonly httpService: HttpService) { }
+
+
+  async sendOTPService(phoneNumber: string): Promise<any> {
+    try {
+      const otp = Math.floor(1000 + Math.random() * 9000);
+      const options = {
+        authorization: process.env.SMS_KEY, message: `Your otp is ${otp}`, numbers: [phoneNumber],
+      }
+      const res = await fast2sms.sendMessage(options)
+      return {res,otp}
+
+    } catch (error) {
+      throw error
+    }
   }
+
+  async getHello(): Promise<any> {
+     
+    return {};
+  }
+
+
   async getSignedURL(fileName: string): Promise<any> {
     return new Promise(async (res, rej) => {
       const params = {

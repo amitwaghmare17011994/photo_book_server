@@ -6,8 +6,20 @@ export class AppController {
   constructor(private readonly appService: AppService) { }
 
   @Get()
-  getHello(): Dummy {
+  getHello(): any {
     return this.appService.getHello();
+  }
+
+  @Post('send_otp')
+  async sendOTP(@Body() req: { phoneNumber: string }): Promise<any> {
+    try {
+      console.log('here');
+      
+      const response = await this.appService.sendOTPService(req.phoneNumber)
+      return { ...response }
+    } catch (error) {
+      return error
+    }
   }
 
 
