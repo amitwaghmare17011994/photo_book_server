@@ -5,16 +5,10 @@ import { AppService } from './app.service';
 export class AppController {
   constructor(private readonly appService: AppService) { }
 
-  @Get()
-  getHello(): any {
-    return this.appService.getHello();
-  }
 
   @Post('send_otp')
   async sendOTP(@Body() req: { phoneNumber: string }): Promise<any> {
     try {
-      console.log('here');
-      
       const response = await this.appService.sendOTPService(req.phoneNumber)
       return { ...response }
     } catch (error) {
@@ -22,10 +16,14 @@ export class AppController {
     }
   }
 
-
-  @Post('upload')
-  async uploadFile(@Body() req: FilePayload): Promise<SignedURLResponse> {
-    const res = await this.appService.getSignedURL(req.name)
-    return { url: res }
+  @Post('verify_otp')
+  async verifyOTP(@Body() req: { phoneNumber: string, otp: number }): Promise<any> {
+    try {
+      const response = await this.appService.verifyOTPSerivce(req.phoneNumber,req.otp)
+      return { ...response }
+    } catch (error) {
+      return error
+    }
   }
+
 }

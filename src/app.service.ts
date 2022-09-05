@@ -1,5 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios'
+import { InjectRepository } from '@nestjs/typeorm';
+import { Users } from './entities/users.entity';
+import { Repository } from 'typeorm';
 
 const aws = require('aws-sdk')
 const fast2sms = require('fast-two-sms')
@@ -17,8 +20,29 @@ const s3 = new aws.S3(
 
 @Injectable()
 export class AppService {
-  constructor(private readonly httpService: HttpService) { }
 
+  constructor(
+    @InjectRepository(Users)
+    private usersRepository: Repository<Users>,
+  ) { }
+
+  async verifyOTPSerivce(phoneNumber: string, otp: number): Promise<any> {
+    try {
+      const existingUserObject = await this.usersRepository.findOneBy({
+        phone_number: phoneNumber,
+        otp: otp
+      })
+ 
+      if (!!existingUserObject) {
+        await this.usersRepository.update({ phone_number: phoneNumber }, { ...existingUserObject, is_otp_verified: true ,otp:0,is_loged_in:true})
+      }
+      return { otpVerified: !!existingUserObject }
+
+    } catch (error) {
+       
+      return { otpVerified: false }
+    }
+  }
 
   async sendOTPService(phoneNumber: string): Promise<any> {
     try {
@@ -27,47 +51,29 @@ export class AppService {
         authorization: process.env.SMS_KEY, message: `Your otp is ${otp}`, numbers: [phoneNumber],
       }
       const res = await fast2sms.sendMessage(options)
-      return {res,otp}
+
+      const existingUserObject = await this.usersRepository.findOneBy({
+        phone_number: phoneNumber
+      })
+      
+ 
+      if (!existingUserObject) {
+        await this.usersRepository.insert({
+          phone_number: phoneNumber,
+          otp: otp,
+          is_otp_verified: false,
+          is_loged_in:false
+        })
+      } else {
+        await this.usersRepository.update({ phone_number: phoneNumber }, { ...existingUserObject, otp: otp })
+      }
+
+      return { res, otp }
 
     } catch (error) {
       throw error
     }
   }
 
-  async getHello(): Promise<any> {
-     
-    return {};
-  }
 
-
-  async getSignedURL(fileName: string): Promise<any> {
-    return new Promise(async (res, rej) => {
-      const params = {
-        Bucket: 'photobookbucket',
-        Key: fileName,
-
-      }
-      const objectUrl = await this.getSignedObjectUrl(params)
-      const objectPutUrl = await this.getSignedPutObjectUrl(params)
-      return res(objectPutUrl)
-
-
-    })
-  }
-
-  async getSignedObjectUrl(params: any): Promise<any> {
-    return new Promise((res, rej) => {
-      s3.getSignedUrl('getObject', params, (err, getUrl) => {
-        return res(getUrl)
-      })
-    })
-  }
-
-  async getSignedPutObjectUrl(params: any): Promise<any> {
-    return new Promise((res, rej) => {
-      s3.getSignedUrl('putObject', params, (err, getUrl) => {
-        return res(getUrl)
-      })
-    })
-  }
 }
